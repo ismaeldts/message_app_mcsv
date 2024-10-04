@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-app-microservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: chat-app-microservice
+  template:
+    metadata:
+      labels:
+        app: chat-app-microservice
+    spec:
+      containers:
+        - name: chat-container
+          image: chat-mcsv:latest
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: websocket-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chat-app-microservice
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-app-microservice
+spec:
+  type: ClusterIP
+  selector:
+    app: chat-app-microservice
+  ports:
+    - port: 8082
+      targetPort: 8082
