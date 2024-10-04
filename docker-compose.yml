@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  postgres-db-chats:
+    container_name: postgres_db_chats
+    image: postgres:15.2
+    environment:
+      POSTGRES_USER: ismaelDev
+      POSTGRES_PASSWORD: Test123
+      POSTGRES_DB: message_app
+    ports:
+      - 5445:5445
+    command:
+      - "-p 5445"
+    restart: unless-stopped
+    networks:
+      - message_app_network
+
+networks:
+  message_app_network:
+    driver: bridge
